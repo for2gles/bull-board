@@ -22,7 +22,6 @@ export abstract class BaseAdapter {
   public readonly type: QueueType;
   public readonly externalJobUrl: QueueAdapterOptions['externalJobUrl'];
   private formatters = new Map<FormatterField, (data: any) => any>();
-  private _visibilityGuard: (request: BullBoardRequest) => Promise<boolean> | boolean = () => true;
 
   protected constructor(
     type: QueueType,
@@ -69,6 +68,8 @@ export abstract class BaseAdapter {
 
   public abstract clean(queueStatus: JobCleanStatus, graceTimeMs: number): Promise<void>;
 
+  public abstract cleanJobScheduler(jobSchedulerId: string): Promise<void>;
+
   public abstract addJob(name: string, data: any, options: QueueJobOptions): Promise<QueueJob>;
 
   public abstract getJob(id: string): Promise<QueueJob | undefined | null>;
@@ -100,4 +101,6 @@ export abstract class BaseAdapter {
   public abstract getStatuses(): Status[];
 
   public abstract getJobStatuses(): JobStatus[];
+
+  private _visibilityGuard: (request: BullBoardRequest) => Promise<boolean> | boolean = () => true;
 }

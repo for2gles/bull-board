@@ -1,17 +1,13 @@
 import { Job, Queue } from 'bullmq';
-import {
-  JobCleanStatus,
-  JobCounts,
-  JobStatus,
-  QueueAdapterOptions,
-  QueueJobOptions,
-  Status,
-} from '../../typings/app';
+import { JobCleanStatus, JobCounts, JobStatus, QueueAdapterOptions, QueueJobOptions, Status, } from '../../typings/app';
 import { STATUSES } from '../constants/statuses';
 import { BaseAdapter } from './base';
 
 export class BullMQAdapter extends BaseAdapter {
-  constructor(private queue: Queue, options: Partial<QueueAdapterOptions> = {}) {
+  constructor(
+    private queue: Queue,
+    options: Partial<QueueAdapterOptions> = {}
+  ) {
     const libName = 'bullmq';
     super(libName, options);
     if (
@@ -32,6 +28,15 @@ export class BullMQAdapter extends BaseAdapter {
 
   public async clean(jobStatus: JobCleanStatus, graceTimeMs: number): Promise<void> {
     await this.queue.clean(graceTimeMs, Number.MAX_SAFE_INTEGER, jobStatus);
+  }
+
+  public async cleanJobScheduler(jobSchedulerId: string): Promise<void> {
+    if (this.queue.removeJobScheduler) {
+      await this.queue.removeJobScheduler(jobSchedulerId);
+    } else {
+      // defensive code,this will be deprecated
+      await this.queue.removeRepeatableByKey(jobSchedulerId);
+    }
   }
 
   public addJob(name: string, data: any, options: QueueJobOptions) {
